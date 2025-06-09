@@ -1,33 +1,39 @@
-"use client"
+'use client';
 
-import type React from "react"
+import type React from 'react';
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Eye, EyeOff, Lock, Mail } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Eye, EyeOff, Lock, Mail } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/use-auth';
 
 export default function LoginPage() {
-  const [showPassword, setShowPassword] = useState(false)
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const router = useRouter()
+  const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const { login, isLoading } = useAuth();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
 
-    // Simulate login process
-    setTimeout(() => {
-      setIsLoading(false)
+    const { success } = await login({ email, password });
+
+    if (success) {
       // Redirect to admin dashboard
-      router.push("/admin")
-    }, 1500)
-  }
+      router.push('/admin');
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
@@ -39,7 +45,9 @@ export default function LoginPage() {
             </div>
           </div>
           <CardTitle className="text-2xl font-bold">Đăng nhập Admin</CardTitle>
-          <CardDescription>Nhập thông tin đăng nhập để truy cập hệ thống quản trị</CardDescription>
+          <CardDescription>
+            Nhập thông tin đăng nhập để truy cập hệ thống quản trị
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -65,7 +73,7 @@ export default function LoginPage() {
                 <Lock className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
                   id="password"
-                  type={showPassword ? "text" : "password"}
+                  type={showPassword ? 'text' : 'password'}
                   placeholder="Nhập mật khẩu"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -89,11 +97,11 @@ export default function LoginPage() {
             </div>
 
             <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
+              {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
             </Button>
           </form>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
