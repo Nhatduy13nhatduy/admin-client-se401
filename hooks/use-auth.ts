@@ -26,7 +26,7 @@ export function useAuth() {
 
       if (data.token) {
         // Store the token in a cookie
-        Cookies.set('admin_token', data.token, { expires: 1 }); // Expires in 1 day
+        Cookies.set('access_token', data.token, { expires: 1 }); // Expires in 1 day
 
         // Store user data in localStorage for easy access
         localStorage.setItem(

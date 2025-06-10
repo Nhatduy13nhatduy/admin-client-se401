@@ -69,22 +69,71 @@ export const useProduct = () => {
 
   // Create a new product
   const onCreateProduct = async (
-    productData: z.infer<typeof productSchema>,
-    isFormData: boolean = false
-  ) => {
-    const validation = productSchema.safeParse(productData);
-    if (!validation.success) {
-      throw new Error(
-        'Validation failed: ' + JSON.stringify(validation.error.format())
-      );
+    productData: any,
+    files?: {
+      mainImage?: File;
+      additionalImages?: File[];
     }
+  ) => {
+    try {
+      // Create FormData to handle both text fields and file uploads
+      const formData = new FormData();
 
-    const response = await postRequest({
-      endPoint: '/api/products',
-      formData: productData,
-      isFormData,
-    });
-    return response;
+      // Add basic product data with proper field names to match the DTO
+      formData.append('Name', productData.name);
+      formData.append('Description', productData.description);
+      formData.append('Price', productData.price.toString());
+      formData.append('InStock', productData.inStock.toString());
+
+      // Add category IDs
+      if (productData.categoryIds && Array.isArray(productData.categoryIds)) {
+        productData.categoryIds.forEach((categoryId: string) => {
+          formData.append('CategoryIds', categoryId);
+        });
+      }
+
+      // Add size IDs if available
+      if (productData.sizeIds && Array.isArray(productData.sizeIds)) {
+        productData.sizeIds.forEach((sizeId: string) => {
+          formData.append('SizeIds', sizeId);
+        });
+      }
+
+      // Add custom sizes if available
+      if (productData.sizes && Array.isArray(productData.sizes)) {
+        productData.sizes.forEach((size: any, index: number) => {
+          formData.append(`Sizes[${index}].Size`, size.size);
+          formData.append(`Sizes[${index}].Quantity`, size.quantity.toString());
+        });
+      }
+
+      // Add images if provided
+      if (files) {
+        // Add main image
+        if (files.mainImage) {
+          formData.append('MainImage', files.mainImage);
+        }
+
+        // Add additional images
+        if (files.additionalImages && files.additionalImages.length > 0) {
+          files.additionalImages.forEach((file) => {
+            formData.append('AdditionalImages', file);
+          });
+        }
+      }
+
+      // Send the request with formData
+      const response = await postRequest({
+        endPoint: '/api/products',
+        formData: formData,
+        isFormData: true,
+      });
+
+      return response;
+    } catch (error) {
+      console.error('Error creating product:', error);
+      throw error;
+    }
   };
 
   // Update an existing product
