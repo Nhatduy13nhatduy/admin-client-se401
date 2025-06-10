@@ -1,13 +1,76 @@
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ArrowLeft, Save, FolderOpen } from "lucide-react"
-import Link from "next/link"
+'use client';
+
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { ArrowLeft, Save, FolderOpen, Loader2 } from 'lucide-react';
+import Link from 'next/link';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { useCategory } from '@/hooks/use-category';
+import { CreateCategoryDto } from '@/type/category';
 
 export default function AddCategoryPage() {
+  const router = useRouter();
+  const { onCreateCategory } = useCategory();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Form state
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [size, setSize] = useState('');
+  const [type, setType] = useState('');
+
+  const handleSubmit = async () => {
+    // Validate inputs
+    if (!name) {
+      toast.error('Tên danh mục là bắt buộc');
+      return;
+    }
+
+    if (!description) {
+      toast.error('Mô tả là bắt buộc');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+
+      const categoryData: CreateCategoryDto = {
+        name,
+        description,
+        size,
+        type,
+      };
+
+      const response = await onCreateCategory(categoryData);
+
+      toast.success('Danh mục đã được tạo thành công');
+      router.push(`/admin/categories/view/${response.id}`);
+    } catch (error) {
+      console.error('Failed to create category:', error);
+      toast.error('Không thể tạo danh mục. Vui lòng thử lại sau.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
@@ -18,15 +81,34 @@ export default function AddCategoryPage() {
             </Link>
           </Button>
           <div>
-            <h1 className="text-3xl font-bold tracking-tight">Thêm danh mục mới</h1>
-            <p className="text-muted-foreground">Tạo danh mục sản phẩm mới cho cửa hàng</p>
+            <h1 className="text-3xl font-bold tracking-tight">
+              Thêm danh mục mới
+            </h1>
+            <p className="text-muted-foreground">
+              Tạo danh mục sản phẩm mới cho cửa hàng
+            </p>
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline">Hủy</Button>
-          <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
-            <Save className="mr-2 h-4 w-4" />
-            Lưu danh mục
+          <Button variant="outline" asChild>
+            <Link href="/admin/categories">Hủy</Link>
+          </Button>
+          <Button
+            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Đang xử lý...
+              </>
+            ) : (
+              <>
+                <Save className="mr-2 h-4 w-4" />
+                Lưu danh mục
+              </>
+            )}
           </Button>
         </div>
       </div>
@@ -39,13 +121,24 @@ export default function AddCategoryPage() {
                 <FolderOpen className="h-5 w-5" />
                 Thông tin danh mục
               </CardTitle>
-              <CardDescription>Nhập thông tin cơ bản của danh mục sản phẩm.</CardDescription>
+              <CardDescription>
+                Nhập thông tin cơ bản của danh mục sản phẩm.
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="name">Tên danh mục *</Label>
-                <Input id="name" placeholder="VD: Sneakers, Running, Casual..." className="font-medium" required />
-                <p className="text-xs text-muted-foreground">Tên danh mục sẽ hiển thị trên website</p>
+                <Input
+                  id="name"
+                  placeholder="VD: Sneakers, Running, Casual..."
+                  className="font-medium"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
+                <p className="text-xs text-muted-foreground">
+                  Tên danh mục sẽ hiển thị trên website
+                </p>
               </div>
 
               <div className="space-y-2">
@@ -55,42 +148,13 @@ export default function AddCategoryPage() {
                   placeholder="Nhập mô tả ngắn gọn về danh mục..."
                   rows={4}
                   className="resize-none"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
                   required
                 />
-                <p className="text-xs text-muted-foreground">Mô tả sẽ giúp khách hàng hiểu rõ hơn về danh mục</p>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="size">Kích thước *</Label>
-                  <Select>
-                    <SelectTrigger id="size">
-                      <SelectValue placeholder="Chọn kích thước" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="large">Lớn</SelectItem>
-                      <SelectItem value="medium">Trung bình</SelectItem>
-                      <SelectItem value="small">Nhỏ</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground">Kích thước ảnh hưởng đến vị trí hiển thị</p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="type">Loại *</Label>
-                  <Select>
-                    <SelectTrigger id="type">
-                      <SelectValue placeholder="Chọn loại" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="sport">Thể thao</SelectItem>
-                      <SelectItem value="running">Chạy bộ</SelectItem>
-                      <SelectItem value="casual">Thường ngày</SelectItem>
-                      <SelectItem value="other">Khác</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground">Phân loại giúp khách hàng tìm kiếm dễ dàng hơn</p>
-                </div>
+                <p className="text-xs text-muted-foreground">
+                  Mô tả sẽ giúp khách hàng hiểu rõ hơn về danh mục
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -139,5 +203,5 @@ export default function AddCategoryPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }
