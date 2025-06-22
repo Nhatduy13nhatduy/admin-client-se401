@@ -3,20 +3,20 @@ import {
   postRequest,
   putRequest,
   deleteRequest,
-} from '@/lib/fetch';
-import { type z } from 'zod';
+} from "@/lib/fetch";
+import { type z } from "zod";
 import {
   productSchema,
   updateProductSchema,
   getProductsSchema,
   type GetProductsParams,
-} from '@/lib/validations/product';
+} from "@/lib/validations/product";
 import {
   CategoryDto,
   CreateCategoryDto,
   UpdateCategoryDto,
   CategoryQueryParams,
-} from '@/type/category';
+} from "@/type/category";
 
 export type ProductQueryParams = {
   PageNumber?: number;
@@ -67,16 +67,16 @@ export const useProduct = () => {
           .map(([key, value]) => [key, String(value)])
       ).toString();
 
-      const url = `/api/products${queryString ? `?${queryString}` : ''}`;
-      console.log('Fetching products from:', url);
+      const url = `/api/products${queryString ? `?${queryString}` : ""}`;
+      console.log("Fetching products from:", url);
 
       const response = await getRequest({ endPoint: url });
-      console.log('Raw API response:', response);
+      console.log("Raw API response:", response);
 
       // The API returns an array directly, not an object with items
       return response;
     } catch (error) {
-      console.error('Error fetching products:', error);
+      console.error("Error fetching products:", error);
       return [];
     }
   };
@@ -102,22 +102,22 @@ export const useProduct = () => {
       const formData = new FormData();
 
       // Add basic product data with proper field names to match the DTO
-      formData.append('Name', productData.name);
-      formData.append('Description', productData.description);
-      formData.append('Price', productData.price.toString());
-      formData.append('InStock', productData.inStock.toString());
+      formData.append("Name", productData.name);
+      formData.append("Description", productData.description);
+      formData.append("Price", productData.price.toString());
+      formData.append("InStock", productData.inStock.toString());
 
       // Add category IDs
       if (productData.categoryIds && Array.isArray(productData.categoryIds)) {
         productData.categoryIds.forEach((categoryId: string) => {
-          formData.append('CategoryIds', categoryId);
+          formData.append("CategoryIds", categoryId);
         });
       }
 
       // Add size IDs if available
       if (productData.sizeIds && Array.isArray(productData.sizeIds)) {
         productData.sizeIds.forEach((sizeId: string) => {
-          formData.append('SizeIds', sizeId);
+          formData.append("SizeIds", sizeId);
         });
       }
 
@@ -133,27 +133,27 @@ export const useProduct = () => {
       if (files) {
         // Add main image
         if (files.mainImage) {
-          formData.append('MainImage', files.mainImage);
+          formData.append("MainImage", files.mainImage);
         }
 
         // Add additional images
         if (files.additionalImages && files.additionalImages.length > 0) {
           files.additionalImages.forEach((file) => {
-            formData.append('AdditionalImages', file);
+            formData.append("AdditionalImages", file);
           });
         }
       }
 
       // Send the request with formData
       const response = await postRequest({
-        endPoint: '/api/products',
+        endPoint: "/api/products",
         formData: formData,
         isFormData: true,
       });
 
       return response;
     } catch (error) {
-      console.error('Error creating product:', error);
+      console.error("Error creating product:", error);
       throw error;
     }
   };
@@ -172,7 +172,7 @@ export const useProduct = () => {
       });
       return response;
     } catch (error) {
-      console.error('Error updating product:', error);
+      console.error("Error updating product:", error);
       throw error;
     }
   };
@@ -196,7 +196,7 @@ export const useProduct = () => {
   // Add a photo to a product
   const onAddProductPhoto = async (productId: string, file: File) => {
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append("file", file);
 
     const response = await postRequest({
       endPoint: `/api/products/${productId}/photos`,
@@ -248,12 +248,12 @@ export const useCategory = () => {
           .map(([key, value]) => [key, String(value)])
       ).toString();
 
-      const url = `/api/categories${queryString ? `?${queryString}` : ''}`;
+      const url = `/api/categories${queryString ? `?${queryString}` : ""}`;
 
       const response = await getRequest({ endPoint: url });
       return response;
     } catch (error) {
-      console.error('Error fetching categories:', error);
+      console.error("Error fetching categories:", error);
       return [];
     }
   };
@@ -275,13 +275,13 @@ export const useCategory = () => {
   const onCreateCategory = async (categoryData: CreateCategoryDto) => {
     try {
       const response = await postRequest({
-        endPoint: '/api/categories',
+        endPoint: "/api/categories",
         formData: categoryData,
         isFormData: false,
       });
       return response;
     } catch (error) {
-      console.error('Error creating category:', error);
+      console.error("Error creating category:", error);
       throw error;
     }
   };
@@ -299,7 +299,7 @@ export const useCategory = () => {
       });
       return response;
     } catch (error) {
-      console.error('Error updating category:', error);
+      console.error("Error updating category:", error);
       throw error;
     }
   };
@@ -312,7 +312,7 @@ export const useCategory = () => {
       });
       return response;
     } catch (error) {
-      console.error('Error deleting category:', error);
+      console.error("Error deleting category:", error);
       throw error;
     }
   };
