@@ -92,10 +92,10 @@ export default function VouchersPage() {
           ? response
           : response?.items || [];
 
-        // Add client-side property for tracking usage (mock data for now)
+        // Calculate used quantity from total and available
         const vouchersWithUsage = voucherItems.map((voucher) => ({
           ...voucher,
-          used: Math.floor(Math.random() * voucher.quantity), // Mock data
+          used: voucher.quantity - voucher.availableQuantity,
         }));
 
         setVouchers(vouchersWithUsage);
@@ -127,19 +127,18 @@ export default function VouchersPage() {
     }
   };
 
-  // Get status based on expiration date and usage
+  // Get status based on expiration date and availability
   const getStatus = (voucher: VoucherDto) => {
+    if (voucher.isExpired) return 'Đã hết hạn';
+    if (voucher.availableQuantity <= 0) return 'Đã hết';
+
     const today = new Date();
     const expiredDate = new Date(voucher.expiredAt);
-
-    if (expiredDate < today) return 'Đã hết hạn';
-    if (voucher.used && voucher.used >= voucher.quantity) return 'Đã hết';
-
     const daysLeft = Math.ceil(
       (expiredDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
     );
-    if (daysLeft <= 7) return 'Sắp hết hạn';
 
+    if (daysLeft <= 7) return 'Sắp hết hạn';
     return 'Đang hoạt động';
   };
 
@@ -216,7 +215,7 @@ export default function VouchersPage() {
         <div className="flex flex-col gap-1">
           <div className="font-medium">Tạo voucher thành công!</div>
           <div>
-            Đã tạo voucher {newVoucher.name} với giá trị{' '}
+            Đã tạo voucher {newVoucher.typeName} với giá trị{' '}
             {new Intl.NumberFormat('vi-VN').format(newVoucher.value)}đ
           </div>
         </div>,
@@ -536,7 +535,12 @@ export default function VouchersPage() {
             <Ticket className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{activeVouchers.length}</div>
+            <div className="text-2xl font-bold">
+              {
+                vouchers.filter((v) => !v.isExpired && v.availableQuantity > 0)
+                  .length
+              }
+            </div>
             <p className="text-xs text-muted-foreground">Voucher</p>
           </CardContent>
         </Card>
@@ -547,7 +551,12 @@ export default function VouchersPage() {
             <Ticket className="h-4 w-4 text-amber-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{totalUsed}</div>
+            <div className="text-2xl font-bold">
+              {vouchers.reduce(
+                (sum, v) => sum + (v.quantity - v.availableQuantity),
+                0
+              )}
+            </div>
             <p className="text-xs text-muted-foreground">Lượt sử dụng</p>
           </CardContent>
         </Card>
@@ -559,7 +568,14 @@ export default function VouchersPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {new Intl.NumberFormat('vi-VN').format(totalValue)}đ
+              {new Intl.NumberFormat('vi-VN').format(
+                vouchers.reduce(
+                  (sum, v) =>
+                    sum + (v.quantity - v.availableQuantity) * v.value,
+                  0
+                )
+              )}
+              đ
             </div>
             <p className="text-xs text-muted-foreground">Đã sử dụng</p>
           </CardContent>
@@ -623,7 +639,7 @@ export default function VouchersPage() {
                     <TableHead>Tên voucher</TableHead>
                     <TableHead>Giá trị</TableHead>
                     <TableHead>Số lượng</TableHead>
-                    <TableHead>Đã sử dụng</TableHead>
+                    <TableHead>Còn lại</TableHead>
                     <TableHead>Hạn sử dụng</TableHead>
                     <TableHead>Trạng thái</TableHead>
                     <TableHead>Ngày tạo</TableHead>
@@ -635,18 +651,18 @@ export default function VouchersPage() {
                     const status = getStatus(voucher);
                     const statusVariant = getStatusBadgeVariant(status);
                     const usagePercent =
-                      ((voucher.used || 0) / voucher.quantity) * 100;
+                      ((voucher.quantity - voucher.availableQuantity) /
+                        voucher.quantity) *
+                      100;
 
                     return (
                       <TableRow key={voucher.id} className="hover:bg-muted/50">
                         <TableCell className="font-medium">
-                          {typeof voucher.id === 'string'
-                            ? voucher.id.substring(0, 8) + '...'
-                            : voucher.id}
+                          {voucher.id.substring(0, 8) + '...'}
                         </TableCell>
                         <TableCell>
                           <div>
-                            <p className="font-medium">{voucher.name}</p>
+                            <p className="font-medium">{voucher.typeName}</p>
                             <p className="text-xs text-muted-foreground">
                               Cập nhật: {formatDate(voucher.updatedAt)}
                             </p>
@@ -660,7 +676,7 @@ export default function VouchersPage() {
                         <TableCell>
                           <div className="text-sm">
                             <span className="font-medium">
-                              {voucher.used || 0}
+                              {voucher.availableQuantity}
                             </span>
                             <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1">
                               <div

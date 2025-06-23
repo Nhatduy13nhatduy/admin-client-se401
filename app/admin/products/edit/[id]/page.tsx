@@ -59,9 +59,7 @@ const productFormSchema = z.object({
   description: z
     .string()
     .min(10, { message: 'Mô tả sản phẩm phải có ít nhất 10 ký tự' }),
-  price: z.coerce
-    .number()
-    .min(10000, { message: 'Giá phải lớn hơn 10,000 VND' }),
+  price: z.coerce.number().min(1, { message: 'Giá phải lớn hơn 1 USD' }),
   inStock: z.coerce.number().min(0, { message: 'Tồn kho không được âm' }),
   categoryIds: z
     .array(z.string())
@@ -494,13 +492,9 @@ export default function EditProductPage() {
                     name="price"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Giá bán (VND)</FormLabel>
+                        <FormLabel>Giá bán (USD)</FormLabel>
                         <FormControl>
-                          <Input
-                            type="number"
-                            placeholder="2,000,000"
-                            {...field}
-                          />
+                          <Input type="number" placeholder="100" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
