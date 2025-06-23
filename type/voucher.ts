@@ -1,12 +1,14 @@
 export interface VoucherDto {
   id: string;
-  name: string;
+  typeName: string;
   value: number;
-  expiredAt: string;
   quantity: number;
+  availableQuantity: number;
   createdAt: string;
   updatedAt: string;
-  used?: number; // Client-side property for tracking usage
+  expiredAt: string;
+  isExpired: boolean;
+  used?: number; // We'll calculate this client-side
 }
 
 // Parameters for creating a new voucher

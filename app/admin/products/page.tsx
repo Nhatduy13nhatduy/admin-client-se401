@@ -169,11 +169,16 @@ export default function ProductsPage() {
 
   const filteredProducts = getBrandFilteredProducts();
 
-  // Format price to VND
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('vi-VN', {
+  // Format price to USD
+  /**
+   * Formats a number as a USD currency string.
+   * @param price - The price to format.
+   * @returns The formatted price string in USD.
+   */
+  const formatPrice = (price: number): string => {
+    return new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'VND',
+      currency: 'USD',
     }).format(price);
   };
 

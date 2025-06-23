@@ -255,7 +255,7 @@ export default function CategoryDetailPage() {
                             <TableCell>
                               {new Intl.NumberFormat('vi-VN', {
                                 style: 'currency',
-                                currency: 'VND',
+                                currency: 'USD',
                               }).format(product.price)}
                             </TableCell>
                             <TableCell>{product.inStock}</TableCell>

@@ -146,11 +146,11 @@ export default function ProductDetailPage() {
     }
   };
 
-  // Format price to VND
+  // Format price to USD
   const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('vi-VN', {
+    return new Intl.NumberFormat('en-IN', {
       style: 'currency',
-      currency: 'VND',
+      currency: 'USD',
     }).format(price);
   };
 

@@ -792,11 +792,11 @@ export default function AddProductPage() {
               <CardContent className="space-y-4">
                 <div className="w-full">
                   <div className="space-y-2">
-                    <Label htmlFor="price">Giá bán (VNĐ) *</Label>
+                    <Label htmlFor="price">Giá bán (USD) *</Label>
                     <Input
                       id="price"
                       type="number"
-                      placeholder="2990000"
+                      placeholder="100"
                       value={price}
                       onChange={(e) =>
                         setPrice(
